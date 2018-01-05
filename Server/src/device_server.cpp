@@ -1,4 +1,5 @@
 #include "device_server.hpp"
+#include "app_server.hpp"
 using namespace server;
 
 /* device server */
@@ -7,7 +8,7 @@ Device_Server::Device_Server(int port) : Server(port)
 
 }
 
-vector<Client> Device_Server::clients;
+vector<Client*> Device_Server::clients;
 
 void Device_Server::Accept()
 {
@@ -33,7 +34,7 @@ void Device_Server::do_accept(evutil_socket_t fd, short event, void * arg)
     }
 
     Client * client = new Client(clientfd, clientAddress);
-    clients.push_back(*client);
+    clients.push_back(client);
     client -> setIndex(clients.size() - 1);
 
     string clientIP = inet_ntoa(clientAddress.sin_addr);
@@ -42,6 +43,7 @@ void Device_Server::do_accept(evutil_socket_t fd, short event, void * arg)
 
     struct bufferevent *bev = bufferevent_socket_new(base, clientfd, BEV_OPT_CLOSE_ON_FREE);
     client -> set_bev(bev);
+
     bufferevent_setcb(client -> get_bev(), read_cb, NULL, error_cb, client);
     bufferevent_enable(client -> get_bev(), EV_READ|EV_WRITE|EV_PERSIST);
 }
@@ -60,13 +62,20 @@ void Device_Server::error_cb(struct bufferevent * bev, short error, void * arg)
 
 void Device_Server::read_cb(struct bufferevent * bev, void *arg)
 {
-    evutil_socket_t fd = bufferevent_getfd(bev);
+    Client * client = (Client *) arg;
     int nbyte;
     char message[256];
 
-    while(nbyte = bufferevent_read(bev, message, 256), nbyte > 0)
+
+    if(nbyte = bufferevent_read(bev, message, 256), nbyte > 0)
     {
-        message[nbyte] = '\0';
-        cout << "fd " << fd << " message : " << message << endl;
+        message[nbyte] = '\n';
+        message[nbyte + 1] = '\0';
+        unsigned i;
+        for (i = 0; i < App_Server::clients.size(); i++)
+        {
+            cout << "msg from " << inet_ntoa(client -> getClientAddress().sin_addr) << " : " << message << endl;
+            bufferevent_write((App_Server::clients[i] -> get_bev()), message, strlen(message));
+        }
     }
 }

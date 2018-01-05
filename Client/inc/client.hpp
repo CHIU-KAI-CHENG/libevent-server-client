@@ -29,6 +29,7 @@ private:
 public:
     Client(int port, const char * ip_addr, bufferevent_data_cb read_ev);
     void Connect();
+    void Write(char * msg);
     evutil_socket_t GetClientfd();
 };
 

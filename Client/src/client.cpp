@@ -36,6 +36,11 @@ void Client::Connect()
     event_base_dispatch(base);
 }
 
+void Client::Write(char * msg)
+{
+    bufferevent_write(bev, msg, strlen(msg));
+}
+
 evutil_socket_t Client::GetClientfd()
 {
     return clientfd;

@@ -7,6 +7,9 @@ INC = inc
 
 
 
+
+
+
 #source file
 SOURCE = $(wildcard $(SRC)/*.cpp)
 #object file
@@ -16,10 +19,11 @@ CFLAGS = -std=c++11 -Wall
 
 
 $(BIN)/$(TARGET) : $(OBJECT)
-	g++ $(CFLAGS) -o $@ $^ -levent
+	g++ $(CFLAGS) -o $@ $^ -levent -lpthread -lprussdrv
 
 $(BIN)/%.o : $(SRC)/%.cpp
 	g++ $(CFLAGS) -I $(INC) -c $< -o $@ -levent
+
 
 
 .PHONY : run
