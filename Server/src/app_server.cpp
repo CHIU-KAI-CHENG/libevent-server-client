@@ -2,7 +2,7 @@
 using namespace server;
 
 /* app_server */
-App_Server::App_Server(int port) : Server(port)
+App_Server::App_Server(int port, MySQLHandler * handler) : Server(port, handler)
 {
 
 }
@@ -69,6 +69,16 @@ void App_Server::read_cb(struct bufferevent * bev, void *arg)
     {
         message[nbyte] = '\0';
         cout << "fd " << fd << " message : " << message << nbyte << " bytes" << endl;
+    }
+}
+
+void App_Server::Write(const char * msg)
+{
+    unsigned i;
+    for (i = 0; i < clients.size(); i++)
+    {
+        cout << msg << endl;
+        bufferevent_write(clients[i] -> get_bev(), msg, strlen(msg));
     }
 }
 

@@ -1,9 +1,11 @@
 #include "device_server.hpp"
 #include "app_server.hpp"
+
 using namespace server;
 
+
 /* device server */
-Device_Server::Device_Server(int port) : Server(port)
+Device_Server::Device_Server(int port, MySQLHandler * handler) : Server(port, handler)
 {
 
 }
@@ -69,13 +71,41 @@ void Device_Server::read_cb(struct bufferevent * bev, void *arg)
 
     if(nbyte = bufferevent_read(bev, message, 256), nbyte > 0)
     {
-        message[nbyte] = '\n';
-        message[nbyte + 1] = '\0';
+
+        message[nbyte] = '\0';
+        cout << nbyte << " msg from " << inet_ntoa(client -> getClientAddress().sin_addr) << " : " << message << endl;
+
+        double lat;
+        double lng;
         unsigned i;
-        for (i = 0; i < App_Server::clients.size(); i++)
+        if (strstr(message, "full"))
         {
-            cout << "msg from " << inet_ntoa(client -> getClientAddress().sin_addr) << " : " << message << endl;
-            bufferevent_write((App_Server::clients[i] -> get_bev()), message, strlen(message));
+            char * token = strtok(message, DELIMITER);
+            for (i = 0; i < 3; i++)
+            {
+                if (i == 1)
+                {
+                    lat = atof(token);
+                    cout << "lat : " << lat << endl;
+                }
+                else if (i == 2)
+                {
+                    lng = atof(token);
+                    cout << "lng : " << lng << endl;
+                }
+                token = strtok(NULL, DELIMITER);
+            }
+            TrashCan * trashcan = TrashCan::Nearest(dbHandler -> GetTrashCans(), lat, lng);
+            bufferevent_write(bev, trashcan -> desc, strlen(trashcan -> desc));
+        }
+        else
+        {
+            for (i = 0; i < App_Server::clients.size(); i++)
+            {
+                message[nbyte] = '\n';
+                message[nbyte + 1] = '\0';
+                bufferevent_write((App_Server::clients[i] -> get_bev()), message, strlen(message));
+            }
         }
     }
 }

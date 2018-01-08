@@ -1,5 +1,6 @@
 #ifndef APP_SERVER_H
 #define APP_SERVER_H
+#define DELIMITER "|"
 
 #include "server.hpp"
 
@@ -16,8 +17,9 @@ namespace server
     public :
 
         static vector<Client*> clients;
-        App_Server(int port);
+        App_Server(int port, MySQLHandler * handler);
         void Accept();
+        void Write(const char * msg);
     };
 
 }

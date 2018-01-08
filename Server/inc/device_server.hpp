@@ -14,7 +14,7 @@ namespace server
     public:
 
         static vector<Client*> clients;
-        Device_Server(int port);
+        Device_Server(int port, MySQLHandler * handler);
         void Accept();
 
     };

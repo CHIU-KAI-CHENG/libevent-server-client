@@ -16,6 +16,8 @@
 #include <event2/bufferevent.h>
 #include <event2/util.h>
 #include <time.h>
+#include "mysqlhandler.hpp"
+#include "trash_can.hpp"
 using namespace std;
 
 namespace server
@@ -54,10 +56,12 @@ namespace server
         struct event_base *base;
         struct event *listen_event;
 
+        static MySQLHandler * dbHandler;
+
 
     public :
 
-        Server(int port);
+        Server(int port, MySQLHandler * handler);
         ~Server();
         void Start();
         virtual void Accept() = 0;

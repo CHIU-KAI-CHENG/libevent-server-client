@@ -3,8 +3,11 @@ using namespace server;
 
 /* server */
 
-Server::Server(int port)
+MySQLHandler * Server::dbHandler;
+
+Server::Server(int port, MySQLHandler * handler)
 {
+    dbHandler = handler;
     serverfd = socket(PF_INET, SOCK_STREAM, 0);
     if (serverfd < 0)
     {
